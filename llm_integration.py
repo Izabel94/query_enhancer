@@ -17,7 +17,7 @@ answer_model = AutoModelForCausalLM.from_pretrained(
 
 def get_answer(prompt: str) -> str:
     """
-    Sends the prompt to the Llama2 model and returns the generated answer.
+    Sends the prompt to the model and returns the generated answer.
     """
     inputs = answer_tokenizer(prompt, return_tensors="pt")
     inputs = {k: v.to(answer_model.device) for k, v in inputs.items()}

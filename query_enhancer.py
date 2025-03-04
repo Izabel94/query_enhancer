@@ -45,11 +45,5 @@ def rewrite_query(raw_query: str, context: str = "") -> str:
         )
     rewritten = rewriter_tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    # In some cases, the model might return the entire prompt plus answer. 
-    # You can parse or slice out just the "rewritten" portion if needed.
-    # For simplicity, let’s just return the full generation.
-
-    return rewritten.strip()
-
     return rewritten.strip()
 

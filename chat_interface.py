@@ -5,13 +5,9 @@ from llm_integration import get_answer
 
 def run_cli():
     print("=== Enhanced Chatbot CLI ===")
-    print("Type 'exit' or 'quit' to terminate.\n")
-
 
     while True:
         user_input = input("Your Query: ")
-        if user_input.lower() in ["exit", "quit"]:
-            break
 
         # 1) Original Query
         original_query = user_input
