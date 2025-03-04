@@ -1,30 +1,55 @@
 # query_enhancer.py
 
-def enhance_query(raw_query: str) -> str:
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+import os
+
+# REWRITER_MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"
+REWRITER_MODEL_NAME = "Qwen/Qwen2-1.5B-Instruct"
+TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+
+rewriter_tokenizer = AutoTokenizer.from_pretrained(REWRITER_MODEL_NAME, use_auth_token = TOKEN)
+rewriter_model = AutoModelForCausalLM.from_pretrained(
+    REWRITER_MODEL_NAME,
+    device_map="auto",       
+    torch_dtype=torch.float16, 
+    use_auth_token=True
+)
+
+def rewrite_query(raw_query: str, context: str = "") -> str:
     """
-    Takes the raw user query and returns an enhanced version.
-    Currently does minimal improvements. Extend as needed.
+    Use an instruct model to rewrite 'raw_query' into a clearer, more specific query,
+    incorporating context if available.
     """
-    # For demonstration, let's just add some prompt context
-    # and fix trivial issues. You could integrate external libraries here.
-    if not raw_query.strip():
-        return raw_query
+    system_prompt = (
+        "You are an AI writing assistant. Your goal is to rewrite the user's query "
+        "in a more detailed and contextually rich manner, while preserving the user's intent.\n\n"
+        f"Context: {context}\n"
+        "User Query:\n"
+        f"{raw_query}\n\n"
+        "Rewrite it as a more specific, clear, grammatically correct question or instruction."
+    )
 
-    # Example improvement technique: ensure query is a full sentence
-    # If user typed "And food?", we might expand it:
-    # "Can you tell me more about the local food options?"
-    # We'll do something simple for now:
-    enhanced = raw_query.strip()
+    # Tokenize
+    inputs = rewriter_tokenizer(system_prompt, return_tensors="pt")
+    inputs = {k: v.to(rewriter_model.device) for k, v in inputs.items()}
 
-    # Basic grammar fix / clarifying phrase:
-    if enhanced.lower().startswith("and "):
-        enhanced = "Can you give more details about " + enhanced[4:].strip() + "?"
-    elif not enhanced.endswith("?"):
-        enhanced += "?"
+    # Generate
+    with torch.no_grad():
+        outputs = rewriter_model.generate(
+            **inputs,
+            max_length=128,
+            temperature=0.7,
+            top_p=0.9,
+            do_sample=True
+        )
+    rewritten = rewriter_tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    # You can add more logic like:
-    # 1. Grammar checks with LanguageTool
-    # 2. Context injection (e.g., "User is planning a trip to Japan, user wants info:")
-    # 3. Breaking up run-on sentences, etc.
+    # In some cases, the model might return the entire prompt plus answer. 
+    # You can parse or slice out just the "rewritten" portion if needed.
+    # For simplicity, let’s just return the full generation.
 
-    return enhanced
+    return rewritten.strip()
+
+    return rewritten.strip()
+

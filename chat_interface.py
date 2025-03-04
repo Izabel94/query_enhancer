@@ -1,29 +1,30 @@
 # chat_interface.py
 
-from query_enhancer import enhance_query
-from lm_integration import get_response_from_model
+from query_enhancer import rewrite_query
+from llm_integration import get_answer
 
 def run_cli():
-    print("Welcome to the Enhanced Chatbot CLI!")
-    print("Type 'exit' or press Ctrl+C to quit.\n")
+    print("=== Enhanced Chatbot CLI ===")
+    print("Type 'exit' or 'quit' to terminate.\n")
+
 
     while True:
-        user_input = input("User Query: ").strip()
+        user_input = input("Your Query: ")
         if user_input.lower() in ["exit", "quit"]:
             break
 
-        # 1) Show the original query
+        # 1) Original Query
         original_query = user_input
-        # 2) Enhance the query
-        enhanced_query = enhance_query(original_query)
+        original_answer = get_answer(original_query)
 
-        # 3) Get responses (both original and enhanced)
-        print("\n[Original Query]")
+        # 2) Rewritten / Enhanced Query
+        enhanced_query = rewrite_query(raw_query=original_query)
+        enhanced_answer = get_answer(enhanced_query)
+
+        print("\n--- Original Query & Response ---")
         print(f"Q: {original_query}")
-        original_response = get_response_from_model(original_query)
-        print(f"A: {original_response}\n")
+        print(f"A: {original_answer}\n")
 
-        print("[Enhanced Query]")
+        print("--- Enhanced Query & Response ---")
         print(f"Q: {enhanced_query}")
-        enhanced_response = get_response_from_model(enhanced_query)
-        print(f"A: {enhanced_response}\n")
+        print(f"A: {enhanced_answer}\n")
