@@ -1,49 +1,43 @@
 # query_enhancer.py
-
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from model_manager import tokenizer, model  
 import torch
-import os
 
-# REWRITER_MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"
-REWRITER_MODEL_NAME = "Qwen/Qwen2-1.5B-Instruct"
-TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+def rewrite_query(raw_query: str, context: list = None) -> str:  # Make context optional
+    context = context or []  # Handle None case
+    # Build conversation history from context
+    conversation_history = ""
+# query_enhancer.py (update the context handling)
+    if context:
+        last_interaction = context[-1]
+        user_query = last_interaction.get("user_query", "")  # Use .get() with default
+        previous_answer = last_interaction.get("answer", "")
+        conversation_history = (
+        f"Previous Query: {user_query}\n"
+        f"Previous Answer: {previous_answer}\n"
+    )
+    else:
+        conversation_history = ""
 
-rewriter_tokenizer = AutoTokenizer.from_pretrained(REWRITER_MODEL_NAME, use_auth_token = TOKEN)
-rewriter_model = AutoModelForCausalLM.from_pretrained(
-    REWRITER_MODEL_NAME,
-    device_map="auto",       
-    torch_dtype=torch.float16, 
-    use_auth_token=True
-)
-
-def rewrite_query(raw_query: str, context: str = "") -> str:
-    """
-    Use an instruct model to rewrite 'raw_query' into a clearer, more specific query,
-    incorporating context if available.
-    """
     system_prompt = (
-        "You are an AI writing assistant. Your goal is to rewrite the user's query "
-        "in a more detailed and contextually rich manner, while preserving the user's intent.\n\n"
-        f"Context: {context}\n"
-        "User Query:\n"
-        f"{raw_query}\n\n"
-        "Rewrite it as a more specific, clear, grammatically correct question or instruction."
+        "Rewrite the user's query to be clear and specific, while preserving intent. "
+        "Incorporate context from the previous interaction if relevant.\n\n"
+        f"{conversation_history}"
+        f"New User Query: {raw_query}\n"
+        "Rewritten Query: "
     )
 
-    # Tokenize
-    inputs = rewriter_tokenizer(system_prompt, return_tensors="pt")
-    inputs = {k: v.to(rewriter_model.device) for k, v in inputs.items()}
+    inputs = tokenizer(system_prompt, return_tensors="pt").to(model.device)
 
-    # Generate
-    with torch.no_grad():
-        outputs = rewriter_model.generate(
-            **inputs,
-            max_length=128,
-            temperature=0.7,
-            top_p=0.9,
-            do_sample=True
-        )
-    rewritten = rewriter_tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Rest of your generation code (with strict parameters)
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=50,
+        temperature=0.3,
+        eos_token_id=tokenizer.eos_token_id,
+        do_sample=True
+    )
 
-    return rewritten.strip()
-
+    # Extract rewritten query
+    rewritten = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    rewritten = rewritten.split("Rewritten Query:")[-1].strip()
+    return rewritten
