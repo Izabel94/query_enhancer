@@ -1,15 +1,13 @@
 # query_enhancer.py
 from model_manager import tokenizer, model  
-import torch
 
 def rewrite_query(raw_query: str, context: list = None) -> str:  # Make context optional
     context = context or []  # Handle None case
     # Build conversation history from context
-    conversation_history = ""
-# query_enhancer.py (update the context handling)
+
     if context:
         last_interaction = context[-1]
-        user_query = last_interaction.get("user_query", "")  # Use .get() with default
+        user_query = last_interaction.get("user_query", "") 
         previous_answer = last_interaction.get("answer", "")
         conversation_history = (
         f"Previous Query: {user_query}\n"
@@ -21,6 +19,8 @@ def rewrite_query(raw_query: str, context: list = None) -> str:  # Make context 
     system_prompt = (
         "Rewrite the user's query to be clear and specific, while preserving intent. "
         "Incorporate context from the previous interaction if relevant.\n\n"
+        "DO NOT ADD MULTIPLE SUB-QUESTIONS. "
+        "OUTPUT ONLY ONE REWRITTEN QUERY.\n\n"
         f"{conversation_history}"
         f"New User Query: {raw_query}\n"
         "Rewritten Query: "
@@ -31,7 +31,7 @@ def rewrite_query(raw_query: str, context: list = None) -> str:  # Make context 
     # Rest of your generation code (with strict parameters)
     outputs = model.generate(
         **inputs,
-        max_new_tokens=50,
+        max_new_tokens=100,
         temperature=0.3,
         eos_token_id=tokenizer.eos_token_id,
         do_sample=True

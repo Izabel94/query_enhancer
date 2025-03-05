@@ -1,6 +1,5 @@
 # llm_integration.py
 from model_manager import tokenizer, model
-import torch
 
 def get_answer(prompt: str, context: list = None) -> str:
     # Build context-aware prompt

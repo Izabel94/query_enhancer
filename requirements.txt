@@ -1,0 +1,5 @@
+transformers==4.40.0
+torch==2.3.0
+streamlit==1.35.0
+python-dotenv==1.0.1
+scikit-learn==1.4.2
