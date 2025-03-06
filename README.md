@@ -62,7 +62,7 @@ Specificity Boost: Converts vague requests - "see things" → "Top cultural land
 
 Intent Clarification: Resolves ambiguity - "weather?" → "Current weather in Tokyo"
 
-## Libraies used
+## Libraries used
 Transformers (Hugging Face): For query rewriting and response generation
 
 Qwen-1.5B Model: Base language model for understanding queries
