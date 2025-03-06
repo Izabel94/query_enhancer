@@ -1,7 +1,7 @@
 # AI Query Enhancement System
 
 ## Project Overview
-A Python application that improves user queries through prompt engineering techniques to optimize responses from generative AI models. Demonstrates the impact of query refinement on response quality across CLI and web interfaces.
+A Python application that improves user queries through prompt engineering techniques to optimize responses from generative AI models. Demonstrates the impact of query refinement on response quality across CLI and web interface.
 
 ## File Structure
 | File               | Purpose                                                                 |
@@ -24,7 +24,7 @@ A Python application that improves user queries through prompt engineering techn
    python main.py
 
 4. Run the web interface:
-    streamlit run chat.py
+   streamlit run chat.py
 
 ## Example Output:
 === Enhanced Chatbot CLI ===
