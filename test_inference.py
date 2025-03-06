@@ -9,7 +9,7 @@ model_name = "Qwen/Qwen2-1.5B-Instruct"
 # Retrieve token from environment variables
 token = os.getenv("HUGGING_FACE_TOKEN")
 if token is None:
-    raise ValueError("Please set your HUGGINGFACE_TOKEN environment variable.")
+    raise ValueError("Please set your HUGGING_FACE_TOKEN environment variable.")
 
 # Since we are running on CPU, we use torch.float32
 device = "cpu"
